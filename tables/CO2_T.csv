@@ -1,0 +1,7 @@
+Tillage Practice,Crop,$\Delta\textrm{CO2}_I$,$\Delta\textrm{CO2}_F$
+Reduced-till,Maize,0,0.08
+Reduced-till,Wheat,-0.01,0.08
+Reduced-till,Soybean,0,0.08
+No-till,Maize,-0.01,0.1
+No-till,Wheat,-0.02,0.1
+No-till,Soybean,-0.01,0.1

@@ -1,0 +1,7 @@
+Tillage Practice,Crop,Temperature,Moisture,Soil,$\Delta\textrm{CO2}_I$,$\Delta\textrm{CO2}_F$
+Reduced-till,Maize,All,All,All,0,? [needs conversion from STIR table]
+Reduced-till,Wheat,All,All,All,0.01,?
+Reduced-till,Soy,All,All,All,0,?
+No-till,Maize,All,All,All,0.01,?
+No-till,Wheat,All,All,All,0.02,?
+No-till,Soy,All,All,All,0.01,?

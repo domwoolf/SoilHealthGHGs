@@ -1,0 +1,5 @@
+Temperature, Moisture, $f_{100_{CC}}$, $f_{100_{T}}$
+Warm, Moist,0.26,0.25
+Warm, Dry,0.26,0.25
+Cool, Moist,0.28,0.25
+Cool, Dry,0.29,0.25

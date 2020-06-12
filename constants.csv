@@ -1,0 +1,12 @@
+variable, value
+CN_legume, 18.7
+CN_non_legume, 80.6
+NUE_legume, 0.5
+NUE_non_legume, 0.5
+EF_N2O, 0.01425
+GWP_N2O, 298
+CO2perFertilizerN, 3.15
+R, 0.5
+f_NUE, 0.87
+f_Np, 4.41
+f_i, 0.49
