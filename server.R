@@ -1,8 +1,8 @@
 # ---------------------------------------------------------------------------------------------
-# Title: Soil Health Greenhouse Gas Calculator - Draft version 0.01 -  (SH-GHG v0.01)
+# Title: Soil Health Greenhouse Gas Calculator
 # Author: Dominic Woolf, Cornell University
 # AuthorUrl: https://scs.cals.cornell.edu/people/dominic-woolf/
-# License: This is a draft (alpha) version, not for public release. Do not share, cite or copy.
+# License: This is a beta version, not for public release. Do not share, cite or copy.
 # 
 # Notes:
 #   1. This version does not support multiple crops in rotation or multiple cover crop types
