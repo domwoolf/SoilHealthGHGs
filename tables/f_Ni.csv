@@ -1,6 +1,7 @@
-Crop	Moisture	$f_{Ni}$
-Maize	Moist	0.0065685714
-Maize	Dry	0.0008642857
-Wheat	Moist	0.0065685714
-Wheat	Dry	0.0008642857
-Soybean	All	0.0
+Crop,Moisture,$f_{Nv}$,$f_{Nl}$
+Maize,Moist,0.00242,0.00415
+Maize,Dry,0.00086,0.00000
+Wheat,Moist,0.00242,0.00415
+Wheat,Dry,0.00086,0.00000
+Soybean,Moist,0.00242,0.00415
+Soybean,Dry,0.00086,0.00000

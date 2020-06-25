@@ -1,4 +1,4 @@
-Crop	f_{Ng}
-Maize	0.01
-Wheat	0.02
-Soybean	0.04
+Crop,f_{Ng}
+Maize,0.012
+Wheat,0.021
+Soybean,0.059

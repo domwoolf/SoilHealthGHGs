@@ -59,7 +59,7 @@ shinyServer(function(input, output, session) {
     output$county_selected = reactive({
         validate(need(input$County != 'Unknown', 'Please specify a county to improve accuracy.'))
     })
-
+    
     # Check for cover crops in dry climate
     output$valid_cc_climate = reactive({
         validate(need(input$Cover.Crop == 'None' | results.full()$Moisture == 'Moist', 
@@ -74,7 +74,7 @@ shinyServer(function(input, output, session) {
             shinyjs::hide(id = "Delta.N", anim = TRUE)
         }
     })
-     
+    
     # Check whether risk assessment was conducted.  If so, ask for more info
     observe({
         if (input$risk_assessment == "Yes") {
@@ -88,6 +88,8 @@ shinyServer(function(input, output, session) {
     
     # ----------------------------------------------------------
     # Results calculations start here...
+    # Note: Table and Equation numbering in comments are cross-references to the "Overall Methods" document
+    #       Please refer to the full documentation to follow the method applied here.
     # ----------------------------------------------------------
     results.full = reactive({
         # ----------------------------------------------------------
@@ -180,46 +182,56 @@ shinyServer(function(input, output, session) {
         # ----------------------------------------------------------
         # Table 11: Direct N2O emission factor for mineral fertilizer
         # ----------------------------------------------------------
-        results$f_Nd = 0.005 * 44/28 # Mg N2O/ Mg N
-        if (input$Crop == 'Maize' & results$Moisture == 'Moist') results$f_Nd = 0.054 * 44/28 * results$clay
-        if (input$Crop == 'Wheat' & results$Moisture == 'Moist') results$f_Nd = 0.016 * 44/28
-        if (input$Crop == 'Soybean') results$f_Nd = 0.0
+        results$f_Nd = 0.0079 # kg N2O/ kg N
+        if (input$Crop == 'Maize' & results$Moisture == 'Moist') results$f_Nd = 0.085 * results$clay
+        if (input$Crop == 'Wheat' & results$Moisture == 'Moist') results$f_Nd = 0.0251 
+        if (input$Crop == 'Soybean' & results$Moisture == 'Moist') results$f_Nd = 0.0251
         # ----------------------------------------------------------
         # Table 12: Direct and indirect N2O emission factor for organic N
         # ----------------------------------------------------------
-        results$f_ONd = tabs$f_ONd[Moisture == results$Moisture, f_ONd * 44/28] # kg N2O/ kg N
-        results$f_ONi = tabs$f_ONd[Moisture == results$Moisture, f_ONi * 44/28] # kg N2O/ kg N
+        results$f_ONd = tabs$f_ONd[Moisture == results$Moisture, f_ONd] # kg N2O/ kg N
+        results$f_ONv = tabs$f_ONd[Moisture == results$Moisture, f_ONv] # kg N2O/ kg N
+        results$f_ONl = tabs$f_ONd[Moisture == results$Moisture, f_ONl] # kg N2O/ kg N
         # ----------------------------------------------------------
-        # Table 13: Indirect N2O emission factor
+        # Table 13: Indirect N2O emission factors for mineral N
         # ----------------------------------------------------------
-        results$f_Ni = tabs$f_Ni[Crop == input$Crop & Moisture %is% results$Moisture, f_Ni] # indirect N2O EF (kg N2O / kg N)
+        results$f_Nv = tabs$f_Ni[Crop == input$Crop & Moisture %is% results$Moisture, f_Nv] # indirect N2O EF, volatilisation (kg N2O / kg N)
+        results$f_Nl = tabs$f_Ni[Crop == input$Crop & Moisture %is% results$Moisture, f_Nl] # indirect N2O EF, leaching (kg N2O / kg N)
         # ----------------------------------------------------------
-        # Table 14: N-optimization emission factor
+        # Table 14: Relative reduction in nitrogen leaching
+        # ----------------------------------------------------------
+        results$f_up = tabs$f_up[Cover.Crop == input$Cover.Crop & Tillage %is% input$Tillage.Practice, f_up]
+        # ----------------------------------------------------------
+        # Table 15: N-optimization emission factor
         # ----------------------------------------------------------
         N.optimization = input$N.optimization
         if (is.null(N.optimization)) N.optimization = 'None'
         results$f_O = if (length(setdiff(N.optimization, c('None', 'Other')))) tabs$N_opt[Practice %in% N.optimization, max(f_O)] else 0.0
         # ----------------------------------------------------------
-        # Table 15: Nitrogen content of grain
+        # Table 16: Nitrogen content of grain
         # ----------------------------------------------------------
         results$f_Ng = tabs$f_Ng[Crop == input$Crop, f_Ng] # crop N content (kg N / kg grain)
         # ----------------------------------------------------------
-        # Table 16: Change in N leaching
+        # Table 17: Change in N leaching
         # ----------------------------------------------------------
         if (results$Moisture == 'Dry') {
             results$Delta.L = 0.0 #  kg N / ha / yr
         } else {
-            if (input$Cover.Crop %in% c('Legume', 'Non-legume')) {
-                results$Delta.L = 0.13 * results$Nrate
+            if (input$Cover.Crop %in% c('Legume')) {
+                results$Delta.L = 0.1 * results$Nrate
             } else {
-                results$Delta.L = switch (make.names(input$Tillage.Practice),
-                                          Reduced.till = 0.03 * results$Nrate,
-                                          No.till = 0.03 * results$Nrate,
-                                          0.0)
+                if (input$Cover.Crop %in% c('Non-legume')) {
+                    results$Delta.L = 0.13 * results$Nrate
+                } else {
+                    results$Delta.L = switch (make.names(input$Tillage.Practice),
+                                              Reduced.till = 0.03 * results$Nrate,
+                                              No.till = 0.06 * results$Nrate,
+                                              0.0)
+                }
             }
         }
         # ----------------------------------------------------------
-        # Table 17: Change in organic-N inputs
+        # Table 18: Change in organic-N inputs
         # ----------------------------------------------------------
         results$Delta.ON =  if (input$Cover.Crop %in% c('Legume', 'Non-legume')) tabs$ON[Cover.Crop == input$Cover.Crop & Moisture==results$Moisture, Delta.ON] else 0.0
         
@@ -234,42 +246,42 @@ shinyServer(function(input, output, session) {
             # ----------------------------------------------------------
             Delta.Y <- Yield * (F_Y_CC + F_Y_T) # kg grain / ha / yr
             # ----------------------------------------------------------
-            # Table 14 (change in N input rate from each group of practices; kg N / ha / yr):
+            # Table 15 (change in N input rate from each group of practices; kg N / ha / yr):
             # ----------------------------------------------------------
-            Delta.N_A_legume <- 52 * constants$f_NUE -70 * Delta.SOC_CC - Delta.Y * f_Ng # kg N / ha / yr 
-            Delta.N_A_non.legume <- -70 * Delta.SOC_CC - Delta.Y * f_Ng #kg N / ha / yr
+            Delta.N_A_legume <- 52 * constants$f_NUE -72 * Delta.SOC_CC # kg N / ha / yr 
+            Delta.N_A_non.legume <- (Delta.L - 22) * constants$f_NUE    # kg N / ha / yr
             Delta.N_A <- Delta.N_A_legume*legume_frac + Delta.N_A_non.legume*(1-legume_frac)
             if (input$Cover.Crop == 'None') Delta.N_A = 0.0
-            Delta.N_B <- -70 * Delta.SOC_T
-            Delta.N_C <- f_O * Nrate  
+            Delta.N_B <- Delta.L - 72 * Delta.SOC_T
+            Delta.N_C <- f_O * (Nrate - Delta.N_A - Delta.N_B + Delta.Y * f_Ng)  
             Delta.N_D <- if ("Other" %in% input$N.optimization) input$Delta.N  else 0.0 # kg N / ha / yr
             # ----------------------------------------------------------
-            # Equation 10: change in N input rate (Mg N / ha / yr)
+            # Equation 10: change in N input rate (kg N / ha / yr)
             # ----------------------------------------------------------
             Delta.N_tot <- 
                 if ('Other' %in% input$N.optimization) {
                     Delta.N_D
                 } else {
-                    (Delta.N_A + Delta.N_B + Delta.L) * (1-f_O) + Delta.N_C
+                    Delta.N_A + Delta.N_B + Delta.N_C - Delta.Y * f_Ng
                 }
-            Delta.N_tot <- Delta.N_tot / 1e3 # convert to Mg N / ha / yr
+            # Delta.N_tot <- Delta.N_tot / 1e3 # convert to kg N / ha / yr
             # ----------------------------------------------------------
             # Equation 9: Change in CO2-equivalent GHG emissions from nitrogen fertilizer production (Mg CO2e / ha / yr).
             # ----------------------------------------------------------
             Delta.CO2_N <- Delta.N_tot * constants$f_Np
             # ----------------------------------------------------------
-            # Equation 8: Change in indirect nitrous oxide emissions (Mg N2O / ha / yr)
+            # Equation 8: Change in indirect nitrous oxide emissions (kg N2O / ha / yr)
             # ----------------------------------------------------------
-            # Delta.N2O_i <- Delta.N_tot * f_Ni
-            Delta.N2O_i <- Delta.N_tot * f_Ni + Delta.ON * f_ONi
+            # Delta.N2O_i <- Delta.N_tot * f_Ni + Delta.ON * f_ONi
+            Delta.N2O_i <- Delta.N_tot * (f_Nv + (1-f_up)*f_Nl) + Delta.ON * (f_ONv + (1-f_up)*f_ONl)
             # ----------------------------------------------------------
-            # Equation 7: Change in direct nitrous oxide emissions (Mg N2O / ha / yr).
+            # Equation 7: Change in direct nitrous oxide emissions (kg N2O / ha / yr).
             # ----------------------------------------------------------
             Delta.N2O_d <- Delta.N_tot * f_Nd + Delta.ON * f_ONd
             # ----------------------------------------------------------
-            # Eq. 6:
+            # Eq. 6: Change in total nitrous oxide emissions (Mg N2O)
             # ----------------------------------------------------------
-            Delta.N2O <- Delta.N2O_d + Delta.N2O_i
+            Delta.N2O <- (Delta.N2O_d + Delta.N2O_i) / 1000
             # ----------------------------------------------------------
             # Eq. 4:  Note that ILUC is reversible, so we also apply the permancence-risk factor to it
             # ----------------------------------------------------------
@@ -310,62 +322,68 @@ shinyServer(function(input, output, session) {
     # ----------------------------------------------------------
     output$results.table = renderTable(stack(results.full())[,2:1])
     output$input.dput = renderPrint(dput(reactiveValuesToList(input)))
-    output$results.report = renderUI({    
-        with (results.full(), HTML(paste(sep='<br/>',
-            h3('Inputs:'),
-            sprintf('State: %s', input$State),
-            sprintf('County: %s', input$County),
-            sprintf('Crop: %s', input$Crop),
-            sprintf('Cover Crop: %s', input$Cover.Crop),
-            sprintf('Tillage: %s', input$Tillage.Practice),
-            sprintf('N management practice(s): %s', paste0(input$N.optimization, collapse = ', ')),
-            if ('Other' %in% input$N.optimization) paste('Decrease in N rate (kg N / ha / yr):', input$Delta.N),
-            h3('Table lookups:'),
-            sprintf('Table 18: Temperature is %s', Temperature),
-            sprintf('Table 18: Moisture is %s', Moisture),
-            sprintf('Table 18: Clay is %.2f %%', clay*100),
-            sprintf('Table 18: Soil is %s', Soil),
-            sprintf('Table 18: Yield is %g kg grain / ha /yr', Yield),
-            sprintf('Table 18: N rate is %g kg N / ha / yr', Nrate),
-            sprintf('Table 3: SOC chage rate from cover crops (Delta.SOC_CC) is %.2f Mg C / ha / yr', Delta.SOC_CC),
-            sprintf('Table 4: SOC change rate from tillage (Delta.SOC_T) is %.2f Mg C / ha / yr', Delta.SOC_T),
-            sprintf('Table 5: SOC permanence factor for cover crops (f_100_CC) is %.2f', f_100_CC),
-            sprintf('Table 5: SOC permanence factor for tillage (f_100_T) is %.2f', f_100_T),
-            sprintf('Table 6: Agricultural input emissions for cover crops (Delta.CO2_I_CC) is %.2f Mg CO2 / ha / yr', Delta.CO2_I_CC),
-            sprintf('Table 6: Agricultural fuel emissions for cover crops (Delta.CO2_I_CC) is %.2f Mg CO2 / ha / yr', Delta.CO2_F_CC),
-            sprintf('Table 7: Agricultural input emissions for tillage (Delta.CO2_I_T) is %.2f Mg CO2 / ha / yr', Delta.CO2_I_T),
-            sprintf('Table 7: Agricultural fuel emissions for tillage (Delta.CO2_F_T) is %.2f Mg CO2 / ha / yr', Delta.CO2_F_T),
-            sprintf('Table 8: Proportional change in yield due to cover crops (F_Y_CC) is %.2f', F_Y_CC),
-            sprintf('Table 9: Proportional change in yield due to tillage (F_Y_T) is %.2f', F_Y_T),
-            sprintf('Table 10: Carbon opportunity cost of leakage (F_i) is %.2f kg Co2e / kg grain', F_i*1000),
-            sprintf('Table 10: Production emissions from leakage (F_p) is %.2f kg Co2e / kg grain', F_p*1000),
-            sprintf('Table 11: N2O direct emissions factor for mineral N (f_Nd) is %.2f Mg N2O/ Mg N', f_Nd),
-            sprintf('Table 12: N2O direct emissions factor for organic N (f_ONd) is %.2f Mg N2O/ Mg N', f_ONd),
-            sprintf('Table 13: N2O indirect emissions factor for mineral N (f_Ni) is %.2f Mg N2O/ Mg N', f_Ni),
-            sprintf('Table 14: N optimization factor (f_O) is %.2f Mg N2O/ Mg N', f_O),
-            sprintf('Table 15: Crop N content (f_Ng) is %.2f kg N / kg grain', f_Ng),
-            sprintf('Table 16: Change in N leachate (Delta.L) is %.2f kg N / ha / yr', Delta.L),
-            sprintf('Table 17: Change in organic N inputs (Delta.ON) is %.2f kg N / ha / yr', Delta.ON),
-            h3('Calculations:'),
-            'Note that equations are evaluated in the order that ensures all dependencies are calculated first.',
-            sprintf('Eq. 5: Change in yield (Delta.Y) is %.2f  kg grain / ha / yr', Delta.Y),
-            sprintf('Table 14: Change in N input rate from cover crops (Delta.N_A) is %.2f  kg N / ha / yr', Delta.N_A),
-            sprintf('Table 14: Change in N input rate from tillage (Delta.N_B) is %.2f  kg N / ha / yr', Delta.N_B),
-            sprintf('Table 14: Change in N input rate from group-C fertilizer management (Delta.N_C) is %.2f  kg N / ha / yr', Delta.N_C),
-            sprintf('Table 14: Change in N input rate from group-D fertilizer management (Delta.N_D) is %.2f  kg N / ha / yr', Delta.N_D),
-            sprintf('Eq. 10: Overall change in N input rate is %.2f  kg N / ha / yr', 1e3*Delta.N_tot),
-            sprintf('Eq. 9: Change in emissions from N fertilizer production (Delta.CO2_N) is %.2f  Mg CO2e / ha / yr', Delta.CO2_N),
-            sprintf('Eq. 8: Change in indirect N2O emissions  (Delta.N2O_i) is %.2e  Mg N2O / ha / yr', Delta.N2O_i),
-            sprintf('Eq. 7: Change in direct N2O emissions  (Delta.N2O_d) is %.2e  Mg N2O / ha / yr', Delta.N2O_d),
-            sprintf('Eq. 6: Change in overall N2O emissions  (Delta.N2O) is %.2e  Mg N2O / ha / yr', Delta.N2O),
-            sprintf('Eq. 4: Leakage emissions (Delta.CO2_L) is %.2f  Mg CO2e / ha / yr', Delta.CO2_L),
-            sprintf('Eq. 3: Annualized SOC sequestration (Delta.SOC) is %.2f  Mg C / ha / yr', Delta.SOC),
-            sprintf('Eq. 2: Risk-adjusted SOC sequestration credit (Delta.CO2_SOC) is %.2f  Mg CO2 / ha / yr', Delta.CO2_SOC),
-            sprintf('Eq. 2: Overall change in CO2 emissions (Delta.CO2) is %.2f  Mg CO2 / ha / yr', Delta.CO2),
-            sprintf('Eq. 2: Overall change in GHG emissions (Delta.GHG) is %.2f  Mg CO2e / ha / yr', Delta.GHG),
-            '<br/>'
-        )))
-    })
+    input.report = reactive({rbindlist(list(
+        list(Description = 'State', Value = input$State, Units = ''),
+        list('County', input$County, ''),
+        list('Crop', input$Crop, ''),
+        list('Cover Crop', input$Cover.Crop, ''),
+        list('Tillage', input$Tillage.Practice, ''),
+        list('N management practice(s)', paste0(input$N.optimization, collapse = ', '), ''),
+        list('Decrease in N rate', if ('Other' %in% input$N.optimization) input$Delta.N else NA, 'kg N / ha / yr')
+    ))})
+    output$input.report = renderTable(input.report())
+    
+    tables.report = reactive({with(results.full(), rbindlist(list(
+        list(Source = 'Table 18', Description = 'Temperature', Value = Temperature, Units = ''),
+        list('Table 18', 'Moisture', Moisture, ''),
+        list('Table 18', 'Clay', clay*100, '%'),
+        list('Table 18', 'Soil', Soil, ''),
+        list('Table 18', 'Yield', Yield, 'kg grain / ha /yr'),
+        list('Table 18', 'N rate', Nrate, 'kg N / ha / yr'),
+        list('Table 3', 'SOC change from cover crops', Delta.SOC_CC, 'Mg C / ha / yr'),
+        list('Table 4', 'SOC change from tillage', Delta.SOC_T, 'Mg C / ha / yr'),
+        list('Table 5', 'SOC permanence factor for cover crops', f_100_CC, ''),
+        list('Table 5', 'SOC permanence factor for tillage', f_100_T, ''),
+        list('Table 6', 'Input emissions for cover crops', Delta.CO2_I_CC, 'Mg CO2 / ha / yr'),
+        list('Table 6', 'Fuel emissions for cover crops', Delta.CO2_F_CC, 'Mg CO2 / ha / yr'),
+        list('Table 7', 'Input emissions for tillage', Delta.CO2_I_T, 'Mg CO2 / ha / yr'),
+        list('Table 7', 'Fuel emissions for tillage', Delta.CO2_F_T, 'Mg CO2 / ha / yr'),
+        list('Table 8', 'Relative change in yield due to cover crops', F_Y_CC, 'Fraction'),
+        list('Table 9', 'Relative change in yield due to tillage', F_Y_T, 'Fraction'),
+        list('Table 10', 'Carbon opportunity cost', F_i*1000, 'kg Co2e / kg grain'),
+        list('Table 10', 'Production emissions from leakage', F_p*1000, 'kg Co2e / kg grain'),
+        list('Table 11', 'N2O direct emissions factor for mineral N', f_Nd, 'kg N2O/ kg N'),
+        list('Table 12', 'N2O direct emissions factor for organic N', f_ONd, 'kg N2O/ kg N'),
+        list('Table 12', 'N2O volatilisation emissions factor for organic N', f_ONv, 'kg N2O/ kg N'),
+        list('Table 12', 'N2O leaching emissions factor for organic N', f_ONl, 'kg N2O/ kg N'),
+        list('Table 13', 'N2O volatilisation emissions factor for mineral N', f_Nv, 'kg N2O/ kg N'),
+        list('Table 13', 'N2O leaching emissions factor for mineral N', f_Nl, 'kg N2O/ kg N'),
+        list('Table 14', 'Relative reduction in nitrogen leaching', f_up, 'Fraction'),
+        list('Table 15', 'N optimization factor (f_O)', f_O, 'Fraction'),
+        list('Table 16', 'Nitrogen content of grain', f_Ng, 'kg N / kg grain'),
+        list('Table 17', 'Change in N leachate (Delta.L)', Delta.L, 'kg N / ha / yr'),
+        list('Table 18', 'Change in organic-N inputs', Delta.ON, 'kg N / ha / yr')
+    )))})
+    output$tables.report = renderTable(tables.report())
+    
+    eq.report = reactive({with(results.full(), rbindlist(list(
+        list(Source = 'Eq. 5', Description = 'Change in yield', Value = Delta.Y, Units = 'kg grain / ha / yr'),
+        list('Table 15', 'Change in N input from cover crops', Delta.N_A, 'kg N / ha / yr'),
+        list('Table 15', 'Change in N input from tillage', Delta.N_B, 'kg N / ha / yr'),
+        list('Table 15', 'Change in N input from group-C fertilizer management', Delta.N_C, 'kg N / ha / yr'),
+        list('Table 15', 'Change in N input from group-D fertilizer management', Delta.N_D, 'kg N / ha / yr'),
+        list('Eq. 10', 'Overall change in N input', Delta.N_tot, 'kg N / ha / yr'),
+        list('Eq. 9', 'Change in emissions from N fertilizer production', Delta.CO2_N, 'Mg CO2e / ha / yr'),
+        list('Eq. 8', 'Change in indirect N2O emissions', Delta.N2O_i, 'kg N2O / ha / yr'),
+        list('Eq. 7', 'Change in direct N2O emissions', Delta.N2O_d, 'kg N2O / ha / yr'),
+        list('Eq. 6', 'Change in overall N2O emissions', Delta.N2O, 'Mg N2O / ha / yr'),
+        list('Eq. 4', 'Leakage emissions', Delta.CO2_L, 'Mg CO2e / ha / yr'),
+        list('Eq. 3', 'Annualized SOC sequestration', Delta.SOC, 'Mg C / ha / yr'),
+        list('Eq. 2', 'Risk-adjusted SOC sequestration credit', Delta.CO2_SOC, 'Mg CO2 / ha / yr'),
+        list('Eq. 2', 'Overall CO2-reduction credit', Delta.CO2, 'Mg CO2 / ha / yr'),
+        list('Eq. 1', 'Overall GHG-reduction credit', Delta.GHG, 'Mg CO2e / ha / yr')
+    )))})
+    output$eq.report = renderTable(eq.report())
     
     output$barplot = renderPlot({
         ggplot(results.summary(), aes(ind, values)) +

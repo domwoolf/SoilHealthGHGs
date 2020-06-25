@@ -44,7 +44,15 @@ shinyUI(fluidPage(
                 ),
             tabPanel("Table", tableOutput('results.table')),
             tabPanel("Input", textOutput('input.dput')),
-            tabPanel("Report", htmlOutput("results.report"))
+            tabPanel("Report", 
+                     tags$h3('User Inputs'),
+                     tableOutput('input.report'), 
+                     tags$br(),
+                     tags$h3('Table Lookups'),
+                     tableOutput('tables.report'),
+                     tags$br(),
+                     tags$h3('Calculations'),
+                     tableOutput('eq.report'))
         ), width = 5)
     )
 ))
