@@ -37,13 +37,7 @@ shinyUI(fluidPage(
             textAreaInput('permanence_info', ' Please upload a copy of the risk-assessment report, including which tool was used, and what risk mitigation practices were implemented)', height = "400%")
         ),
         mainPanel(tabsetPanel(
-            tabPanel("Plot", 
-                tags$h3("Note, this an alpha-testing version.  
-                        Look-up tables and equations subject to change.", style = "color:FireBrick"),
-                plotOutput('barplot', height = '250px')
-                ),
-            tabPanel("Table", tableOutput('results.table')),
-            tabPanel("Input", textOutput('input.dput')),
+            tabPanel("Plot", plotOutput('barplot', height = '250px')),
             tabPanel("Report", 
                      tags$h3('User Inputs'),
                      tableOutput('input.report'), 

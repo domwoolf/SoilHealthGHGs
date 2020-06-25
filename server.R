@@ -214,18 +214,20 @@ shinyServer(function(input, output, session) {
         # ----------------------------------------------------------
         # Table 17: Change in N leaching
         # ----------------------------------------------------------
+        Nrate.leach = results$Nrate
+        if ('Soybean' %in% input$Crop) Nrate.leach = Nrate.leach + 60
         if (results$Moisture == 'Dry') {
             results$Delta.L = 0.0 #  kg N / ha / yr
         } else {
             if (input$Cover.Crop %in% c('Legume')) {
-                results$Delta.L = 0.1 * results$Nrate
+                results$Delta.L = 0.1 * Nrate.leach
             } else {
                 if (input$Cover.Crop %in% c('Non-legume')) {
-                    results$Delta.L = 0.13 * results$Nrate
+                    results$Delta.L = 0.13 * Nrate.leach
                 } else {
                     results$Delta.L = switch (make.names(input$Tillage.Practice),
-                                              Reduced.till = 0.03 * results$Nrate,
-                                              No.till = 0.06 * results$Nrate,
+                                              Reduced.till = 0.03 * Nrate.leach,
+                                              No.till = 0.06 * Nrate.leach,
                                               0.0)
                 }
             }
@@ -248,12 +250,15 @@ shinyServer(function(input, output, session) {
             # ----------------------------------------------------------
             # Table 15 (change in N input rate from each group of practices; kg N / ha / yr):
             # ----------------------------------------------------------
-            Delta.N_A_legume <- 52 * constants$f_NUE -72 * Delta.SOC_CC # kg N / ha / yr 
-            Delta.N_A_non.legume <- (Delta.L - 22) * constants$f_NUE    # kg N / ha / yr
+            Delta.N_A_legume <- 52 * constants$f_NUE -72 * Delta.SOC_CC - Delta.Y * f_Ng # kg N / ha / yr 
+            Delta.N_A_non.legume <- (Delta.L - 22 - Delta.Y * f_Ng) * constants$f_NUE    # kg N / ha / yr
             Delta.N_A <- Delta.N_A_legume*legume_frac + Delta.N_A_non.legume*(1-legume_frac)
-            if (input$Cover.Crop == 'None') Delta.N_A = 0.0
-            Delta.N_B <- Delta.L - 72 * Delta.SOC_T
-            Delta.N_C <- f_O * (Nrate - Delta.N_A - Delta.N_B + Delta.Y * f_Ng)  
+            Delta.N_B <- 72 * Delta.SOC_T
+            if (input$Cover.Crop == 'None') {
+                Delta.N_A = 0.0
+                Delta.N_B = Delta.N_B + Delta.L - Delta.Y * f_Ng
+            }
+            Delta.N_C <- f_O * (Nrate - Delta.N_A - Delta.N_B)  
             Delta.N_D <- if ("Other" %in% input$N.optimization) input$Delta.N  else 0.0 # kg N / ha / yr
             # ----------------------------------------------------------
             # Equation 10: change in N input rate (kg N / ha / yr)
@@ -262,7 +267,7 @@ shinyServer(function(input, output, session) {
                 if ('Other' %in% input$N.optimization) {
                     Delta.N_D
                 } else {
-                    Delta.N_A + Delta.N_B + Delta.N_C - Delta.Y * f_Ng
+                    Delta.N_A + Delta.N_B + Delta.N_C
                 }
             # Delta.N_tot <- Delta.N_tot / 1e3 # convert to kg N / ha / yr
             # ----------------------------------------------------------
