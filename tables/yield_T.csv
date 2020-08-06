@@ -1,11 +1,11 @@
 Tillage Practice, Crop, Moisture, Rotation, $F_{Y_T}$
-No-till, Maize, All, Maize-Soybean, -1.67
-No-till, Maize, All, Continuous Maize, -6.31
-No-till, Soybean, All, All, 0
-No-till, Wheat, Moist, All, -4
+No-till, Maize, All, Maize-Soybean, 0.0
+No-till, Maize, All, Continuous Maize, 0.0
+No-till, Soybean, All, All, 0.0
+No-till, Wheat, Moist, All, -4.0
 No-till, Wheat, Dry, All, 4.3
-Reduced-till, Maize, All, Maize-Soybean, -0.835
-Reduced-till, Maize, All, Continuous Maize, -3.155
-Reduced-till, Soybean, All, All, 0
-Reduced-till, Wheat, Moist, All, -2
-Reduced-till, Wheat, Dry, All, 2.15
+Reduced-till, Maize, All, Maize-Soybean, 0.0
+Reduced-till, Maize, All, Continuous Maize, 0.0
+Reduced-till, Soybean, All, All, 0.0
+Reduced-till, Wheat, Moist, All, -2.0
+Reduced-till, Wheat, Dry, All, 2.2

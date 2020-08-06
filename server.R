@@ -66,6 +66,18 @@ shinyServer(function(input, output, session) {
                       'Cover crops not supported in dry climate!'))
     })
     
+    # Check if Yield is known for specified location and crop
+    output$valid_yield = reactive({
+      msg = paste('No yield data available for', input$Crop, 'in specified location')
+      validate(need(!is.na(results.full()$Yield), msg))
+    })
+    
+    # Check if Nrate is known for specified location and crop
+    output$valid_Nrate = reactive({
+      msg = paste('No nitrogen fertilizer data available for', input$Crop, 'in specified location')
+      validate(need(!is.na(results.full()$Nrate), msg))
+    })
+    
     # Check whether user value of "change in N rate" is required.  If so, ask for amount
     observe({
         if ('Other' %in% input$N.optimization) {
@@ -109,19 +121,16 @@ shinyServer(function(input, output, session) {
             results$Moisture = tabs$state[NAME==input$State, Moisture]
             results$clay = tabs$state[NAME==input$State, clay/100]
             results$Soil = tabs$state[NAME==input$State, soil.class]
-            # results$Yield = tabs$county[STATE==input$State, get(paste0(Crop,'.Yield'))]
-            # results$Nrate = tabs$county[STATE==input$State, get(paste0(Crop,'.Nrate'))]
+            results$Yield = tabs$state[NAME==input$State, get(paste0(input$Crop,'Yield'))]
+            results$Nrate = tabs$state[NAME==input$State, get(paste0(input$Crop,'Nrate'))]
         } else {
             results$Temperature = tabs$county[STATE==input$State & NAME==input$County, Temperature]
             results$Moisture = tabs$county[STATE==input$State & NAME==input$County, Moisture]
             results$clay = tabs$county[STATE==input$State & NAME==input$County, clay/100]
             results$Soil = tabs$county[STATE==input$State & NAME==input$County, soil.class]
-            # results$Yield = tabs$county[STATE==input$State & NAME==input$County, get(paste0(Crop,'.Yield'))]
-            # results$Nrate = tabs$county[STATE==input$State & NAME==input$County, get(paste0(Crop,'.Nrate'))]
+            results$Yield = tabs$county[STATE==input$State & NAME==input$County, get(paste0(input$Crop,'Yield'))]
+            results$Nrate = tabs$county[STATE==input$State & NAME==input$County, get(paste0(input$Crop,'Nrate'))]
         }
-        # set dummy values for yield and N-rate, for now (values not yet entered in table)
-        results$Yield = c(10500, 4500, 3500)[match(input$Crop, c('Maize', 'Wheat', 'Soybean'))]# kg grain / ha / yr
-        results$Nrate = c(170, 220, 0)[match(input$Crop, c('Maize', 'Wheat', 'Soybean'))] # kg N / ha / yr
         # ----------------------------------------------------------
         # Table 1:
         # ----------------------------------------------------------
@@ -206,7 +215,8 @@ shinyServer(function(input, output, session) {
         # ----------------------------------------------------------
         N.optimization = input$N.optimization
         if (is.null(N.optimization)) N.optimization = 'None'
-        results$f_O = if (length(setdiff(N.optimization, c('None', 'Other')))) tabs$N_opt[Practice %in% N.optimization, max(f_O)] else 0.0
+        N.optimization = sub('VRT', paste0('VRT.', input$Crop), N.optimization)
+        results$f_O = if (length(setdiff(N.optimization, c('None', 'Other')))) tabs$N_opt[Practice %in% N.optimization, max(c(0.0, f_O))] else 0.0
         # ----------------------------------------------------------
         # Table 16: Nitrogen content of grain
         # ----------------------------------------------------------
