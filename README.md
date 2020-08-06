@@ -1,4 +1,4 @@
-# Soil Health Greenhouse Gas Calculator - Version 1.00 -  (SH-GHG v1.00)
+# Soil Health Greenhouse Gas Calculator - Version 1.01 
 ### License: This is a beta version, not for public release. Do not share, cite or copy.
 
 Notes:
