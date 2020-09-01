@@ -44,7 +44,7 @@ shinyUI(fluidPage(
             tabPanel("Plot", plotOutput('barplot', height = '250px')),
             tabPanel("Report", 
                      "For complete documetation of the method, which includes the Tables and Equations referenced by number below, please refer to the documentation at the following url:",
-                     tags$a('https://github.com/domwoolf/SoilHealthGHGs/blob/master/man/OverallMethods_1.00.pdf'),
+                     tags$a('https://github.com/domwoolf/SoilHealthGHGs/blob/master/man/OverallMethods_1.01.pdf'),
                      tags$h3('User Inputs'),
                      tableOutput('input.report'), 
                      tags$br(),
