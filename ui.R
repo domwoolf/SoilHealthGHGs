@@ -64,7 +64,7 @@ shinyUI(fluidPage(
                      tags$h3('User Inputs'),
                      tableOutput('input.report'), 
                      tags$br(),
-                     tags$h3('Table Lookups'),
+                     tags$h3('Derived parameters'),
                      tableOutput('tables.report'),
                      tags$br(),
                      tags$h3('Calculations'),

@@ -265,7 +265,7 @@ shinyServer(function(input, output, session) {
       Delta.N_A_legume <- 52 * constants$f_NUE -72 * Delta.SOC_CC - Delta.Y * f_Ng # kg N / ha / yr 
       Delta.N_A_non.legume <- (Delta.L - 22 - Delta.Y * f_Ng) * constants$f_NUE    # kg N / ha / yr
       Delta.N_A <- Delta.N_A_legume*legume_frac + Delta.N_A_non.legume*(1-legume_frac)
-      Delta.N_B <- 72 * Delta.SOC_T
+      Delta.N_B <- -72 * Delta.SOC_T
       if (input$Cover.Crop == 'None') {
         Delta.N_A = 0.0
         Delta.N_B = Delta.N_B + Delta.L - Delta.Y * f_Ng
@@ -346,7 +346,8 @@ shinyServer(function(input, output, session) {
     list('Cover Crop', input$Cover.Crop, ''),
     list('Tillage', input$Tillage.Practice, ''),
     list('N management practice(s)', paste0(input$N.optimization, collapse = ', '), ''),
-    list('Decrease in N rate', if ('Other' %in% input$N.optimization) input$Delta.N else NA, 'kg N / ha / yr')
+    list('Decrease in N rate', if ('Other' %in% input$N.optimization) input$Delta.N else NA, 'kg N / ha / yr'),
+    list('Reversal risk', input$R, '%')
   ))})
   output$input.report = renderTable(input.report())
   
@@ -369,8 +370,8 @@ shinyServer(function(input, output, session) {
     list('Table 9', 'Relative change in yield due to tillage', F_Y_T, 'Fraction'),
     list('Table 10', 'Carbon opportunity cost', round(F_i*1000, 2), 'kg Co2e / kg grain'),
     list('Table 10', 'Production emissions from leakage', F_p*1000, 'kg Co2e / kg grain'),
-    list('Table 11', 'N2O direct emissions factor for mineral N', f_Nd, 'kg N2O/ kg N'),
-    list('Table 12', 'N2O direct emissions factor for organic N', f_ONd, 'kg N2O/ kg N'),
+    list('Table 11', 'N2O direct emissions factor for mineral N', round(f_Nd,3), 'kg N2O/ kg N'),
+    list('Table 12', 'N2O direct emissions factor for organic N', round(f_ONd,3), 'kg N2O/ kg N'),
     list('Table 12', 'N2O volatilisation emissions factor for organic N', f_ONv, 'kg N2O/ kg N'),
     list('Table 12', 'N2O leaching emissions factor for organic N', f_ONl, 'kg N2O/ kg N'),
     list('Table 13', 'N2O volatilisation emissions factor for mineral N', f_Nv, 'kg N2O/ kg N'),
@@ -400,7 +401,7 @@ shinyServer(function(input, output, session) {
     list('Eq. 2', 'Overall CO2-reduction credit', Delta.CO2, 'Mg CO2 / ha / yr'),
     list('Eq. 1', 'Overall GHG-reduction credit', Delta.GHG, 'Mg CO2e / ha / yr')
   )))})
-  output$eq.report = renderTable(eq.report(), digits=2)
+  output$eq.report = renderTable(eq.report(), digits=7)
   
   output$barplot = renderPlot({
     ggplot(results.summary(), aes(ind, values)) +
