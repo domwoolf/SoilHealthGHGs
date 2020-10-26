@@ -1,0 +1,89 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title></title></head><body><p><strong>1) What do the units Mg CO<sub>2</sub>e ha<sup>-1</sup> yr<sup>-1</sup> mean?</strong></p>
+
+<p>Let’s break this down step by step.</p>
+
+<p>“Mg” is short for Megagram, one million grams, which is the same as a metric tonne. It is the equal to 1.1 US short tons.  There are 39. 4 bushels of corn in 1 Mg, and 36.7 bushels of wheat or soybean.</p>
+
+<p>“CO<sub>2</sub>e” is short for carbon-dioxide-equivalent.  We use “equivalent” values, because there are many greenhouse gases, of which the most important in agriculture are carbon dioxide (CO<sub>2</sub>), methane (CH<sub>4</sub>), and nitrous oxide (N<sub>2</sub>O).  Methane mainly comes from livestock, manure and rice production, which are not included in the current version of FAST-GHG, although we plan to add them later.  In order to calculate the combined impact of all these gases on climate we multiply each by a factor, known as its global warming potential (GWP), which represents how effectively it traps the sun’s energy relative to CO<sub>2</sub>. We use IPCC default GWP values based on the amount of energy each adds to the Earth system over 100 years.  The GWP for methane is 28, and for nitrous oxide is 298.  The sum of all the greenhouse gasses multiplied by their respective GWPs gives us a single overall metric of Mg CO<sub>2</sub>e.</p>
+
+<p>“ha<sup>-1</sup> yr<sup>-1</sup>” means per hectare of land area per year. One hectare is equal to 2.47 acres.</p>
+
+<p>The sign is also important to mention.  Because we calculate avoided emissions, a positive value is good.  It means that there has been a reduction in atmospheric greenhouse gases.  Conversely, negative values are bad.  They mean that greenhouse gas emissions went up.</p>
+
+<hr>
+
+<!-- 
+**Why do you calculate avoided emissions per unit area of land, rather than per unit of crop produced?**
+
+---
+ -->
+
+<p><strong>2) The soil organic carbon (SOC) change in FAST-GHG seems low compared to other calculators. Why is that?</strong></p>
+
+<p>FAST-GHG accounts for several issues that are often overlooked in many SOC calculations. These include a discount for &ldquo;permanence&quot;—the risk that a practice will not always be continued indefinitely—because any gains in SOC will be lost again if the management practice ceases. Also, soil carbon will not keep accumulating indefinitely after a practice is begun, but will reach a new steady state after several decades. FAST-GHG accounts for the average benefit over 100 years. </p>
+
+<hr>
+
+<p><strong>3) Why does FAST-GHG calculate average greenhouse gases over 100 years?  That seems like a long time horizon and many people could be interested in the shorter-term impacts.</strong></p>
+
+<p>Although it is true that in many cases people are interested to know the shorter-term impacts, there are some compelling reasons why it is important to take a long-term perspective on this.</p>
+
+<p>Firstly, there is the fact that any gains in SOC due to a change in management only persist for as long as the management is continued.  In other words the change in management, if it is to have any net impact on SOC at all, will have to continue indefinitely.</p>
+
+<p>Secondly, we need to consider this first point in conjunction with the fact that, as a new steady state is approached after a few decades, the management will no longer sequester any new carbon.  </p>
+
+<p>The third important point is that climate change necessitates us to think over the long term.  The net increase in the Earth’s temperature is mainly driven not by how fast we emit or draw down carbon dioxide, but by the total amount of carbon dioxide we add to or remove from the atmosphere over the long term.</p>
+
+<p>Taken together, the facts that 1) a new management must be continued into the long term to have any impact, and 2) that it is only the net change in carbon once a steady state is reached that matters for climate change, clearly indicate that using short term drawdown rates would give a biased overestimate of how effective SOC sequestration is as a climate-change abatement strategy.</p>
+
+<p>The choice of a 100 year time horizon was selected to provide a balance between the critical importance of reducing emissions over the coming decades with the importance of managing climate change into the more distant future to maintain a habitable planet.  It is aligned, for example, with UNFCCC (the United Nations Framework Convention on Climate Change) methods for calculating the global warming potential of greenhouse gases, which also use an average 100 year time horizon to balance the long and short term impacts on climate.</p>
+
+<hr>
+
+<p><strong>4) How accurate are the predictions from FAST-GHG?</strong></p>
+
+<p>FAST-GHG is intended to predict the average effect of a practice over many years and many fields. The actual greenhouse gas emissions from a specific farm in a specific year may be higher or lower than these values.  However, the calculator is expected to provide good estimates of the average. Predictions are based on high-quality field data whenever possible. The predictions are, therefore, aligned with the field data used to develop them, but have not yet been tested against independent data for individual fields. For a detailed explanation of what data were used to develop the tool, please refer to the <a href="https://github.com/domwoolf/SoilHealthGHGs/blob/master/man/OverallMethods_1.01.pdf">complete documentation</a>.</p>
+
+<hr>
+
+<p><strong>5) I expected non-leguminous cover crops to reduce my emissions, but FAST-GHG predicts that they will increase? What is the reason for this?</strong></p>
+
+<p>Non-leguminous cover crops are often considered to be a method to improve nitrogen cycling by capturing and storing soil nitrogen that would otherwise leach away in the winter.  If this were the only factor involved, then we should expect nitrogen fertilizer inputs to go down under non-legume cover crops, with corresponding benefits to greenhouse gas emissions.</p>
+
+<p>However, overall nitrogen cycling depends on interactions between a variety of factors including also how much nitrogen gets locked up in new soil organic matter; how efficiently the nitrogen in the cover crop is used by subsequent crops; how much the nitrogen demand of the following crop is changed as a result of yield impacts of the cover crop; and how much nitrous oxide is released during mineralization (decomposition) of the cover crop after it has been terminated. FAST-GHG bases its calculation on all of these factors, providing an estimate of the average impact across locations and years.  </p>
+
+<p>It is important to recognize that nitrogen cycling and nitrous oxide emissions are incredibly variable between sites and over time, and are one of the most challenging things to estimate accurately for a specific farm and year.  For this reason, the actual values for a specific farm and season could well be different from the values calculated here. But, FAST-GHG predictions should be realistically representative of the average values.  Indeed, many extension agencies recommend an additional nitrogen-fertilizer application following a non-leguminous cover crop to compensate for any nitrogen immobilization that occurs, which is compatible with the values estimated by the FAST-GHG model.</p>
+
+<hr>
+
+<p><strong>6) Why are there GHG emissions from leakage?</strong></p>
+
+<p>When a practice is predicted to change crop yield, we need to consider the indirect impacts of that yield change.  For example, a reduction in yield on one farm (for example, if you select wheat with no-till in a moist climate) will tend to drive supply chains to compensate by purchasing the yield deficit from elsewhere.  The additional demand for crops from other locations would, in turn, require some combination of increased production intensity elsewhere and land-use change to provide additional cropland on which to grow the crop.  These indirect impacts that occur off the farm are referred to as &quot;leakage&rdquo;. </p>
+
+<p>GHG emissions from leakage are notoriously difficult to quantify robustly.  Nonetheless, they cannot simply be ignored, as this would be equivalent to assigning them a value of zero which we know to be a particularly poor estimate.  FAST-GHG provides a reasonable unbiased central estimate of the size of leakage emissions by assuming that there is a balanced contribution from intensification and from indirect land use change, and that any carbon emissions from land-use change would be representative of the average emissions globally wherever that crop is grown. For a more detailed explanation of how this is calculated, please refer to the <a href="https://github.com/domwoolf/SoilHealthGHGs/blob/master/man/OverallMethods_1.01.pdf">complete documentation</a>.  </p>
+
+<hr>
+
+<!-- **6) If I have information such as fertilizer rate, should I use my information or the default values provided by FAST-GHG?**
+ 
+If you have reliable information, you should always use it in place of the default values.
+
+---
+ -->
+
+<p><strong>7) For nitrogen fertilizer, when I enter two practices at the same time, why is the result the same as for only one practice?</strong></p>
+
+<p>If two fertilizer management practices are used, FAST-GHG assumes that the reduction in overall fertilizer rates is determined by the practice that is most beneficial. If you know how much your fertilizer rates have actually been reduced through introduction of a practice or combination of practices, you can select &ldquo;other&rdquo; as your fertilizer management and enter the actual application rates. Provided the fertilizer-rate data you have are accurate, this can provide a more accurate estimate than the defaults.</p>
+
+<hr>
+
+<p><strong>8) For nitrogen fertilizer, what practices does the “other” category include? And why do I have to enter the change in fertilizer application rate if I select “other”?</strong></p>
+
+<p>There are a wide range of ways to reduce fertilizer application rates, including practices such as moving from over-application to recommended rates, transitioning to split applications, using slow-release formulations (such as polymer-coated), or adding nitrification inhibitors. In each of these cases, the actual impact on fertilizer rate is determined more by the specific farm management rather than the type of intervention itself.  Therefore, providing default assumptions for such practices is not well-supported by available scientific studies, and making an accurate calculation requires that we actually know how much the farmer reduced nitrogen rates as a result of the practice.</p>
+
+<hr>
+
+<p><strong>9) I use manure as a fertilizer, do I enter this manure use under the “other” category for nitrogen fertilizer?</strong></p>
+
+<p>FAST-GHG does not currently include manure use. This option is planned to be included in a future update.</p>
+</body></html>

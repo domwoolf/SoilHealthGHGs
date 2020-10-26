@@ -15,15 +15,14 @@ states = fread(paste0(tables.path, 'state.csv'))[, NAME]
 counties = fread(paste0(tables.path, 'county.csv'))[, .(state = STATE, county = NAME)]
 setkey(counties, state, county)
 
-
 shinyUI(fluidPage(
     includeCSS("www/myStyle.css"),
     useShinyjs(),
     div(img(src = "AtkinsonLogo.svg", height="50px"), style="position: absolute; top: 10px; right: 10px;"),
     titlePanel(div( 
-             h1("FAST-GHG",
-             h3("Fertilizer And Soil Tool for GreenHouse Gases"),
-             h4("A FAST calculator for climate-change mitigation in agriculture"))), 
+        h1("FAST-GHG",
+           h3("Fertilizer And Soil Tool for GreenHouse Gases"),
+           h4("A FAST calculator for climate-change mitigation in agriculture"))), 
         windowTitle="FAST-GHG"),
     sidebarLayout(
         sidebarPanel(
@@ -36,31 +35,44 @@ shinyUI(fluidPage(
             tags$head(tags$style("#valid_yield {color: firebrick}")),
             textOutput("valid_Nrate"),
             tags$head(tags$style("#valid_Nrate {color: firebrick}")),
-            radioButtons("Cover.Crop", "Cover crop type", c('None', 'Legume', 'Non-legume')),
-            textOutput("valid_cc_climate"),
-            tags$head(tags$style("#valid_cc_climate {color: firebrick}")),
+            # textOutput("valid_cc_climate"),
+            # tags$head(tags$style("#valid_cc_climate {color: firebrick}")),
+            radioButtons("Cover.Crop", "Cover crop type", 
+                         choiceNames = c('None', 'Legume', 'Non-legume', 'Mixed'),
+                         choiceValues = c('None', 'Legume', 'Non-legume', 'Mixed')),
             radioButtons("Tillage.Practice", "Tillage practice", 
                          c('Conventional', 'Reduced-till', 'No-till')),
             checkboxGroupInput("N.optimization", "Nitrogen fertilizer practice(s)", 
                                choiceValues = c('Model', 'VRT', 'Timing', 'Other'),
                                choiceNames = c('Model-based optimization', 
-                                 'Variable Rate Technology', 
-                                 'Improved Timing', 
-                                 'Other')),
+                                               'Variable Rate Technology', 
+                                               'Improved Timing', 
+                                               'Other')),
             bsTooltip("N.optimization", "", "right", options = list(container = "body")),
             numericInput("Delta.N", "Reduction in N fertilizer application (kg N / ha / year) - use negative values if N input increased", 0, step = 10),
             radioButtons('risk_assessment', label = 'Have you conducted a risk assessment?', 
                          choices = c('Yes', 'No'), selected = 'No'),
             sliderInput('R', "What is your estimate of the risk that cover cropping will cease within the next 100 years? (100% means absolute certainty that the practice will cease in the future; 0% means absolute certainty that the practice will continue over the century", 0, 100, 0, step = 10, value = 50, post = '%'),
-            textAreaInput('permanence_info', ' Please upload a copy of the risk-assessment report, including which tool was used, and what risk mitigation practices were implemented)', height = "400%")
+            # If we want user to upload a risk assessment, then it should go here:
+            #    textAreaInput('permanence_info', ' Please upload a copy of the risk-assessment report, including which tool was used, and what risk mitigation practices were implemented)', height = "400%")
+            checkboxInput('Advanced', "Show advanced inputs"),
+            sliderInput('Yield', 'Crop Yield (tonnes / ha)', 0, 15, 5, 0.1),
+            sliderInput('Nrate', 'Mineral nitrogen fertilizer application rate (kg / ha)', 0 , 300, 150, 1)
         ),
         mainPanel(tabsetPanel(
-            tabPanel("Results", plotOutput('barplot', height = '250px')),
+            tabPanel("Results",
+                     div(style = "max-width: 600px;",
+                         plotOutput('barplot', height = '250px'),
+                         tags$br(),
+                         hr(),
+                         htmlOutput('results.text')
+                     )
+            ),
             tabPanel("Calculations", 
                      p("For complete documentation of the method, 
                        which includes the Tables and Equations referenced by number below, 
                        please refer to the documentation ",
-                     a(href='https://github.com/domwoolf/SoilHealthGHGs/blob/master/man/OverallMethods_1.01.pdf', "available here.", target="_blank")),
+                       a(href='https://github.com/domwoolf/SoilHealthGHGs/blob/master/man/OverallMethods_1.01.pdf', "available here.", target="_blank")),
                      tags$h3('User Inputs'),
                      tableOutput('input.report'), 
                      tags$br(),
@@ -95,18 +107,14 @@ shinyUI(fluidPage(
                      p("You can find a complete description of how the calculations are performed, and the scientific basis for the method  ", 
                        a(href = 'https://github.com/domwoolf/SoilHealthGHGs/blob/master/man/OverallMethods_1.01.pdf', 'here.', target="_blank", .noWS = "outside", target="_blank"), 
                        .noWS = c("after-begin", "before-end"))
-                     ),
-            tabPanel("FAQs", width = 5,
-                     tags$br(),
-                     p(tags$b("The soil organic carbon (SOC) change in FAST-GHG seems low to me.  Why is that?"),
-                     tags$br(),
-                     "..."),
-                     p(tags$b("I expected non-leguminous cover crops to reduce my emissions, but FAST-GHG
-                              predicts that they will increase? What is the reason for this?"),
-                       tags$br(),
-                       "...")
-            )
+            ),
+            tabPanel("FAQs", width = 4,
+                     br(),
+                     div(style = "padding: 20px;", includeHTML("FAQ.html"))
+                     # h3("Coming soon..."),
+                     # tags$img(src = "under-construction.png", height="200px")
             ))
         )
     )
+)
 )
